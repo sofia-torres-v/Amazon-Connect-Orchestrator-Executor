@@ -9,7 +9,7 @@ Backend serverless en AWS para gestionar créditos y reservas deportivas mediant
 
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 - [Características](#-características)
 - [Arquitectura](#-arquitectura)
@@ -26,7 +26,7 @@ Backend serverless en AWS para gestionar créditos y reservas deportivas mediant
 
 ---
 
-## ✨ Características
+## Características
 
 ### Funcionalidades Principales
 
@@ -42,16 +42,16 @@ Backend serverless en AWS para gestionar créditos y reservas deportivas mediant
 
 ### Características Técnicas
 
-- 🚀 **100% Serverless**: Sin servidores que mantener
-- 📊 **Auto-escalable**: De 0 a millones de requests
-- 💰 **Pago por uso**: Solo pagas lo que usas
-- 🔒 **Seguro**: IAM roles con mínimo privilegio
-- 📝 **Logs Completos**: CloudWatch para debugging
-- 🌍 **Zona Horaria**: Manejo correcto de Buenos Aires (UTC-3)
+- **100% Serverless**: Sin servidores que mantener
+- **Auto-escalable**: De 0 a millones de requests
+- **Pago por uso**: Solo pagas lo que usas
+- **Seguro**: IAM roles con mínimo privilegio
+- **Logs Completos**: CloudWatch para debugging
+- **Zona Horaria**: Manejo correcto de Buenos Aires (UTC-3)
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ### Diagrama de Alto Nivel
 
@@ -105,7 +105,7 @@ Usuario: "✅ Reserva confirmada! Código: RES-ABC123"
 ```
 ---
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 ### AWS Services
 
@@ -134,7 +134,7 @@ pytz>=2023.3       # Manejo de zonas horarias
 
 ---
 
-## 📦 Prerequisitos
+## Prerequisitos
 
 ### Software Requerido
 
@@ -164,7 +164,7 @@ aws configure
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 sports-reservations-serverless-chatbot-aws/
@@ -207,7 +207,7 @@ sports-reservations-serverless-chatbot-aws/
 
 ---
 
-## 🚀 Instalación Local
+## Instalación Local
 
 ### 1. Clonar el Repositorio
 
@@ -244,7 +244,7 @@ sam --version
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### Deployment Completo (Primera Vez)
 
@@ -295,7 +295,7 @@ aws cloudformation describe-stack-resources \
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Testing Local con SAM
 
@@ -342,7 +342,7 @@ cat response.json
 
 ---
 
-## ⚙️ Configuración de Servicios AWS
+## Configuración de Servicios AWS
 
 ### Amazon Lex - Bot Router
 
@@ -434,7 +434,7 @@ aws lambda add-permission \
 
 ---
 
-## 🔐 Variables de Entorno
+## Variables de Entorno
 
 Las Lambdas reciben estas variables automáticamente desde `template.yaml`:
 
@@ -456,7 +456,7 @@ Environment:
 
 ---
 
-## 📚 API Reference
+## API Reference
 
 ### Lambda: check-balance
 
@@ -568,7 +568,7 @@ Environment:
 
 ---
 
-## 📊 DynamoDB Schema
+## DynamoDB Schema
 
 ### Tabla: sports-customers
 
@@ -599,38 +599,16 @@ Environment:
 
 ---
 
-## 📝 Licencia
+## Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
 
 ---
 
-## 👤 Autor
+## Autor
 
 **Sofia U. Torres**
 
 - [GitHub](https://github.com/sofia-torres-v)
 
 ---
-
-## 🙏 Agradecimientos
-
-- [AWS Serverless Application Model (SAM)](https://aws.amazon.com/serverless/sam/)
-- [Amazon Lex Documentation](https://docs.aws.amazon.com/lexv2/)
-- [Amazon Connect Documentation](https://docs.aws.amazon.com/connect/)
-- Comunidad de AWS en español
-
----
-
-## 🔗 Recursos Adicionales
-
-- [Frontend Repository](https://github.com/tu-usuario/sports-chatbot-frontend) - Chat widget y configuración de Connect
-- [AWS Free Tier](https://aws.amazon.com/free/) - Prueba gratis por 12 meses
-
----
-
-<div align="center">
-
-**⭐ Si este proyecto te resultó útil, considera darle una estrella en GitHub ⭐**
-
-</div>
