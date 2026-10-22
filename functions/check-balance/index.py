@@ -11,20 +11,8 @@ import boto3
 dynamodb = boto3.resource('dynamodb')
 customers_table = dynamodb.Table(os.environ['CUSTOMERS_TABLE'])
 
-
 def handler(event, context):
-    """
-    Handler para consultar balance
-    
-    Evento esperado desde Connect:
-    {
-        "Details": {
-            "Parameters": {
-                "customer_dni": "12345678"
-            }
-        }
-    }
-    """
+
     print(f"Evento recibido: {json.dumps(event)}")
     
     try:
@@ -36,6 +24,7 @@ def handler(event, context):
         # Buscar cliente en DynamoDB
         response = customers_table.get_item(
             Key={'customer_dni': customer_dni}
+            # En DynamoDB, busca ítem partition key'customer_dni cuyo valor es el que fue recibido de Connect.
         )
         
         print(f"Respuesta de DynamoDB: {json.dumps(response, default=str)}")
