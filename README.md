@@ -1,4 +1,4 @@
-# AppBarrio
+#  AppBarrio: agente de IA para reservar canchas comunitarias
 
 Arquitectura backend serverless en AWS para la gestión de reservas de canchas comunitarias mediante conversación natural (Chat). Integra **Amazon Connect**, **Amazon Q in Connect** y **Amazon Lex V2** sobre **AWS Lambda** y **DynamoDB**.
 
