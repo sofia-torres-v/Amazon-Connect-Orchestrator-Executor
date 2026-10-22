@@ -9,7 +9,7 @@ AppBarrio nace de un problema real: la falta de un sistema accesible para reserv
 La interfaz web está basada en la plantilla oficial del workshop de integración de Amazon Connect, personalizada con la identidad visual de AppBarrio. Integra el script del widget de chat, permitiendo a los usuarios interactuar en tiempo real con el flujo conversacional impulsado por Amazon Q y Lex.
 
 <div align="center">
-<img src="./assets/banner.png" alt="Interfaz web AppBarrio" width="85%" />
+<img src="./assets/banner.png" alt="Interfaz web AppBarrio" width="100%" />
 </div>
 
 ## Flujo conversacional
@@ -29,7 +29,7 @@ El chatbot guía al usuario desde la consulta inicial hasta la confirmación de 
 El sistema implementa un **Patrón Híbrido Clasificador + Especialista (Router/Dispatcher Pattern)**, separando el razonamiento de IA de la ejecución transaccional determinista.
 
 <div align="center">
-<img src="./assets/arquitectura.png" alt="Arquitectura AWS AppBarrio" width="85%" />
+<img src="./assets/arquitectura.png" alt="Arquitectura AWS AppBarrio" width="100%" />
 </div>
 
 ### Decisiones de diseño clave
