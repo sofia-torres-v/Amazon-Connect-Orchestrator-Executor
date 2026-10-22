@@ -5,11 +5,13 @@
 [![AWS SAM](https://img.shields.io/badge/AWS%20SAM-Serverless-FF9900?style=for-the-badge&logo=amazon-web-services&logoColor=white)](https://aws.amazon.com/serverless/sam/)
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Amazon Connect](https://img.shields.io/badge/Amazon%20Connect-AI-FF9900?style=for-the-badge&logo=amazon-web-services&logoColor=white)](https://aws.amazon.com/connect/)
+[![DynamoDB](https://img.shields.io/badge/DynamoDB-4053D6?style=for-the-badge&logo=amazondynamodb&logoColor=white)](https://aws.amazon.com/dynamodb/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-Arquitectura backend 100% serverless en AWS para la gestión de reservas de canchas comunitarias mediante conversación natural (Chat/Voz). Integra **Amazon Connect**, **Amazon Q in Connect (RAG)** y **Amazon Lex V2** sobre **AWS Lambda** y **DynamoDB**.
+Arquitectura backend serverless en AWS para la gestión de reservas de canchas comunitarias mediante conversación natural (Chat). Integra **Amazon Connect**, **Amazon Q in Connect (RAG)** y **Amazon Lex V2** sobre **AWS Lambda** y **DynamoDB**.
 
 </div>
+
 
 ## Descripción
 
