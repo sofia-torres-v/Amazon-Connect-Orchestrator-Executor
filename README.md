@@ -4,7 +4,7 @@ Arquitectura serverless en AWS para gestionar reservas de canchas comunitarias m
 
 > proyecto presentado en la Hackathon ENEISOFT Edición XV (noviembre de 2025), donde recibió un reconocimiento por aporte tecnológico.
 
-AppBarrio nace de un problema real: la dificultad de acceder a espacios deportivos públicos de forma organizada. La solución permite consultar disponibilidad, precios y reglamentos, y realizar reservas desde una interfaz conversacional, sin apps adicionales ni formularios complejos.
+AppBarrio nace de un problema real: la dificultad de acceder a espacios deportivos públicos de forma organizada. La solución permite consultar disponibilidad, precios, reglamentos y realizar reservas desde una interfaz conversacional.
 
 📝 **Artículo: [Dev.io](https://dev.to/sofia_torresvilca_10ed7f/appbarrio-agente-de-ia-con-amazon-connect-y-lex-patron-orquestador-ejecutor-32ch)**
 
