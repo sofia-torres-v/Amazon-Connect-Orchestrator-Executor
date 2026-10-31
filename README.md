@@ -10,15 +10,11 @@ AppBarrio nace de un problema real: la dificultad de acceder a espacios deportiv
 
 ## Interfaz de usuario
 
-La interfaz web parte de la plantilla oficial del workshop de integración de Amazon Connect, personalizada con la identidad visual de AppBarrio. Incluye el widget de chat de Amazon Connect, que permite conversar en tiempo real con el flujo impulsado por Amazon Q y Lex.
+La interfaz web, basada en la plantilla oficial del workshop de integración de Amazon Connect y personalizada con la identidad visual de AppBarrio, incorpora un chat en tiempo real que guía al usuario desde la consulta inicial hasta la confirmación de la reserva, mediante Amazon Q y Lex.
 
 <div align="center">
 <img src="./assets/banner.png" alt="Interfaz web AppBarrio" width="100%" />
 </div>
-
-## Flujo conversacional
-
-El chatbot guía al usuario desde la consulta inicial hasta la confirmación de la reserva:
 
 <div align="center">
 
