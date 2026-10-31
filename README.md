@@ -1,12 +1,16 @@
-#  AppBarrio: agente de IA para reservar canchas comunitarias
+# AppBarrio: agente de IA para reservar canchas comunitarias
 
-Arquitectura backend serverless en AWS para la gestión de reservas de canchas comunitarias mediante conversación natural (Chat). Integra **Amazon Connect**, **Amazon Q in Connect** y **Amazon Lex V2** sobre **AWS Lambda** y **DynamoDB**.
+Arquitectura serverless en AWS para gestionar reservas de canchas comunitarias mediante conversación natural (chat). Usa el patrón **Orquestador + Ejecutor**: **Amazon Q in Connect** razona y orquesta, y **Amazon Lex V2** ejecuta la lógica transaccional sobre **AWS Lambda** y **DynamoDB**.
 
-AppBarrio nace de un problema real: la falta de un sistema accesible para reservar canchas deportivas públicas. La solución permite consultar disponibilidad, precios, reglamentos y realizar reservas a través de una interfaz conversacional inteligente, sin apps adicionales ni formularios complejos.
+> proyecto presentado en la Hackathon ENEISOFT Edición XV (noviembre de 2025), donde recibió un reconocimiento por aporte tecnológico.
+
+AppBarrio nace de un problema real: la dificultad de acceder a espacios deportivos públicos de forma organizada. La solución permite consultar disponibilidad, precios y reglamentos, y realizar reservas desde una interfaz conversacional, sin apps adicionales ni formularios complejos.
+
+📝 **Artículo: [Dev.io](https://dev.to/sofia_torresvilca_10ed7f/appbarrio-agente-de-ia-con-amazon-connect-y-lex-patron-orquestador-ejecutor-32ch)**
 
 ## Interfaz de usuario
 
-La interfaz web está basada en la plantilla oficial del workshop de integración de Amazon Connect, personalizada con la identidad visual de AppBarrio. Integra el script del widget de chat, permitiendo a los usuarios interactuar en tiempo real con el flujo conversacional impulsado por Amazon Q y Lex.
+La interfaz web parte de la plantilla oficial del workshop de integración de Amazon Connect, personalizada con la identidad visual de AppBarrio. Incluye el widget de chat de Amazon Connect, que permite conversar en tiempo real con el flujo impulsado por Amazon Q y Lex.
 
 <div align="center">
 <img src="./assets/banner.png" alt="Interfaz web AppBarrio" width="100%" />
@@ -14,7 +18,7 @@ La interfaz web está basada en la plantilla oficial del workshop de integració
 
 ## Flujo conversacional
 
-El chatbot guía al usuario desde la consulta inicial hasta la confirmación de reserva mediante conversación natural:
+El chatbot guía al usuario desde la consulta inicial hasta la confirmación de la reserva:
 
 <div align="center">
 
@@ -26,60 +30,87 @@ El chatbot guía al usuario desde la consulta inicial hasta la confirmación de 
 
 ## Arquitectura del sistema
 
-El sistema implementa un **Patrón Híbrido Clasificador + Especialista (Router/Dispatcher Pattern)**, separando el razonamiento de IA de la ejecución transaccional determinista.
+El diseño sigue el patrón **Orquestador + Ejecutor**: la IA interpreta y decide, y un bot determinista ejecuta. Así se separa el razonamiento de la IA de la ejecución transaccional.
 
 <div align="center">
 <img src="./assets/arquitectura.png" alt="Arquitectura AWS AppBarrio" width="100%" />
 </div>
 
+### Roles de cada pieza
+
+| Pieza | Rol | Qué hace |
+| :-- | :-- | :-- |
+| **Amazon Q in Connect** | Agente orquestador | Interpreta el mensaje del usuario. Si es una consulta (precios, reglamento, horarios), responde con RAG sobre documentos en S3. Si es una reserva, deriva al bot transaccional. Si hace falta, escala a un agente humano. |
+| **`bot-reservas`** (Lex V2) | Ejecutor transaccional | Bot tradicional con intents y slots. Recoge DNI, tipo de cancha, fecha y hora, y ejecuta la lógica de negocio mediante Lambda. |
+| **`bot-clasificador-q`** (Lex V2) | Conector | Bot que Amazon Connect requiere para integrar Amazon Q in Connect. No contiene lógica de negocio propia. |
+| **AWS Lambda + DynamoDB** | Lógica y datos | Consulta de saldo, reservas y formateo de resúmenes. |
+
 ### Decisiones de diseño clave
 
-**¿Por qué Amazon Q in Connect + Lex V2 (2 Bots)?**
+**¿Por qué Amazon Q in Connect como orquestador y Lex V2 como ejecutor?**
 
-- `bot-clasificador-q` **(Agente Orquestador):** actúa como interfaz agéntica. Amazon Q razona sobre el mensaje, responde preguntas de S3 (RAG) o decide qué herramienta/bot invocar.
-- `bot-reservas` **(Bot Transaccional):** recopila de forma estructurada los datos del usuario (DNI, fecha, hora) sin alucinaciones de LLM ni consumo innecesario de tokens.
+- Q in Connect interpreta lenguaje natural y decide qué camino seguir (responder con RAG, reservar o escalar).
+- Para recoger datos estructurados (DNI, fecha, hora), un bot con slots valida cada dato y reduce el riesgo de que un LLM lo invente o lo interprete mal.
+- Cada pieza hace lo que mejor hace: el LLM conversa y decide; el bot transaccional ejecuta de forma predecible.
 
-**¿Por qué Amazon Q in Connect y no Amazon Bedrock?**
-
-- Para un volumen reducido de documentos (FAQ, precios, políticas), Q in Connect ofrece RAG nativo integrado directamente con Amazon Connect sin costos adicionales de vectorización.
 
 **¿Por qué funciones Lambda separadas?**
 
-- Siguiendo el principio de responsabilidad única: si la consulta de saldo/disponibilidad falla, el módulo de reservas o el parser de resúmenes sigue operando.
+- Por responsabilidad única: si la consulta de saldo falla, el módulo de reservas y el formateador de resúmenes siguen operando.
 
 ## Características principales
 
-- **Atención agéntica e inteligente:** respuestas en lenguaje natural sobre reglamentos, precios y horarios mediante Amazon Q in Connect realizando RAG sobre documentos PDF en S3.
-- **Reservas automáticas:** flujo conversacional guiado con Amazon Lex V2 para recopilación estructurada de datos (DNI, fecha, hora, tipo de cancha).
-- **Arquitectura serverless event-driven:** despliegue automatizado con AWS SAM, escalabilidad automática y cero costo en reposo.
-- **Escalamiento a agentes humanos (handoff):** generación automática de resúmenes de conversación con Lambda para transferir contexto completo al soporte humano.
-- **Mínimo privilegio (PoLP):** configuración estricta de políticas IAM por función Lambda y tabla DynamoDB.
+- **Atención con IA generativa:** respuestas en lenguaje natural sobre reglamentos, precios y horarios, con RAG sobre documentos PDF en S3 mediante Amazon Q in Connect.
+- **Reservas guiadas:** flujo conversacional con Amazon Lex V2 para recopilar datos de forma estructurada (DNI, tipo de cancha, fecha, hora).
+- **Serverless:** despliegue automatizado de la capa de aplicación con AWS SAM. Lambda y DynamoDB (on-demand) no cobran por capacidad ociosa; Amazon Connect y Q in Connect tienen su propio modelo de precios.
+- **Mínimo privilegio (PoLP):** políticas IAM acotadas por función Lambda y tabla DynamoDB.
 
 ## Tecnologías
 
-| Categoría                   | Tecnología                                         |
-| :-------------------------- | :------------------------------------------------- |
-| **Compute**                 | AWS Lambda (Python 3.13)                           |
-| **Database**                | Amazon DynamoDB (On-Demand)                        |
+| Categoría | Tecnología |
+| :-- | :-- |
+| **Compute** | AWS Lambda (Python 3.13) |
+| **Database** | Amazon DynamoDB (On-Demand) |
 | **Conversational AI / RAG** | Amazon Connect, Amazon Q in Connect, Amazon Lex V2 |
-| **Storage**                 | Amazon S3                                          |
-| **Frontend**                | HTML, CSS, Amazon Connect Chat Widget              |
-| **IaC & Ops**               | AWS SAM, AWS IAM, Amazon CloudWatch                |
+| **Storage** | Amazon S3 |
+| **Frontend** | HTML, CSS, Amazon Connect Chat Widget |
+| **IaC & Ops** | AWS SAM, AWS IAM, Amazon CloudWatch |
+
+## Alcance y limitaciones
+
+Este proyecto es un **prototipo**, no un sistema listo para producción.
+
+- No medí costos reales, latencia ni comportamiento bajo carga.
+- La base de conocimiento es pequeña (FAQ, precios y reglamento); no sé cómo se comportaría con cientos de documentos.
+- No se incluye autenticación de usuarios: la identificación es por DNI dentro del flujo conversacional.
+- La calidad de las respuestas de Q in Connect no se evaluó de forma sistemática.
+- Parte de la configuración (Connect, Q, bots de Lex) es manual; ver la siguiente sección.
+
+## Qué despliega SAM y qué se configura a mano
+
+`sam deploy` despliega la **capa de aplicación**: funciones Lambda, tablas DynamoDB, roles IAM y permisos de invocación. Estos recursos **no** se crean con `sam deploy` y se configuran por separado:
+
+- La instancia de Amazon Connect (el despliegue solicita su ARN).
+- El asistente y el agente de Amazon Q in Connect, y los documentos en S3 que usa para RAG.
+- Los bots de Amazon Lex V2 (`bot-reservas` y `bot-clasificador-q`).
+- El widget de chat de Connect y la interfaz web.
+
+El paso a paso está en [docs/TECHNICAL.md](docs/TECHNICAL.md).
 
 ## Estructura del repositorio
 
 ```text
-📦 appbarrio-aws-serverless
+📦 Amazon-Connect-Orchestrator-Executor
 ├── 📁 functions
-│   ├── 📁 check-balance       # Lambda: consulta de saldo/disponibilidad
+│   ├── 📁 check-balance       # Lambda: consulta de saldo
 │   ├── 📁 router              # Lambda: fulfillment de reservas (Lex V2)
 │   └── 📁 text-parser         # Lambda: formateo de resúmenes (Amazon Q)
+├── 📁 events                   # Eventos de prueba para sam local invoke
 ├── 📁 assets                   # Imágenes del proyecto
 ├── 📁 docs
 │   └── TECHNICAL.md            # Documentación técnica detallada
 ├── template.yaml               # Plantilla IaC de AWS SAM
 ├── samconfig.toml              # Configuración de despliegue SAM
-├── LICENSE
 └── README.md
 ```
 
@@ -91,12 +122,13 @@ El sistema implementa un **Patrón Híbrido Clasificador + Especialista (Router/
 - AWS SAM CLI
 - Python 3.13+
 - Cuenta de AWS con permisos IAM adecuados
+- Una instancia de Amazon Connect ya creada (ver la sección anterior)
 
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/sofia-torres-v/appbarrio-aws-serverless.git
-cd appbarrio-aws-serverless
+git clone https://github.com/sofia-torres-v/Amazon-Connect-Orchestrator-Executor.git
+cd Amazon-Connect-Orchestrator-Executor
 ```
 
 ### 2. Construir y desplegar
@@ -112,10 +144,6 @@ sam deploy --guided
 >
 > Consulta la **[Documentación Técnica Detallada](docs/TECHNICAL.md)**.
 
-## Licencia
-
-Este proyecto está bajo la [Licencia MIT](LICENSE).
-
 ---
 
-**Desarrollado por [Sofía Torres](https://github.com/sofia-torres-v)** ✨
+**Desarrollado por [Sofía Torres](https://github.com/sofia-torres-v)** · [LinkedIn](https://www.linkedin.com/in/sofia-torres-v/) ✨

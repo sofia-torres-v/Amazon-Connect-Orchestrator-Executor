@@ -18,8 +18,8 @@ Asegúrate de tener instaladas las siguientes herramientas en tu entorno local:
 ### Paso 1: Clonar el repositorio
 
 ```bash
-git clone https://github.com/sofia-torres-v/appbarrio-aws-serverless.git
-cd appbarrio-aws-serverless
+git clone https://github.com/sofia-torres-v/Amazon-Connect-Orchestrator-Executor.git
+cd Amazon-Connect-Orchestrator-Executor
 ```
 
 ### Paso 2: Compilar el proyecto con AWS SAM
@@ -40,13 +40,23 @@ sam deploy --guided
 
 > Durante el asistente, se solicitará el ARN de tu instancia de Amazon Connect para configurar los permisos de invocación.
 
+### Qué crea SAM y qué configuras a mano
+
+| Lo despliega `sam deploy` | Lo configuras por separado |
+| :-- | :-- |
+| Funciones Lambda (`check-balance`, `router`, `text-parser`) | Instancia de Amazon Connect |
+| Tablas DynamoDB | Asistente y agente de Amazon Q in Connect |
+| Roles y políticas IAM | Documentos en S3 para el RAG |
+| Permisos de invocación para Connect y Lex | Bots de Lex V2 (`bot-reservas`, `bot-clasificador-q`) |
+| | Widget de chat e interfaz web |
+
 ## 3. Pruebas locales con SAM CLI
 
 > ⚠️ **Requisito:** [Docker](https://www.docker.com/) debe estar instalado y en ejecución para simular el entorno Lambda localmente.
 
 Puedes probar las funciones Lambda localmente utilizando los eventos simulados ubicados en la carpeta `events/`:
 
-**Consulta de saldo/disponibilidad:**
+**Consulta de saldo:**
 
 ```bash
 sam local invoke CheckBalanceFunction -e events/check-balance-event.json
@@ -66,12 +76,12 @@ sam local invoke RouterFunction -e events/load-credits-event.json
 
 ## 4. Seguridad y gestión de permisos (IAM)
 
-El proyecto implementa el **Principio de Mínimo Privilegio (PoLP)** mediante políticas gestionadas nativas de AWS SAM en el archivo `template.yaml`:
+El proyecto aplica el **Principio de Mínimo Privilegio (PoLP)** mediante políticas gestionadas de AWS SAM en `template.yaml`:
 
-| Función                | Política             | Alcance                                                              |
-| :--------------------- | :------------------- | :------------------------------------------------------------------- |
-| `RouterFunction`       | `DynamoDBCrudPolicy` | Lectura y escritura sobre `sports-customers` y `sports-reservations` |
-| `CheckBalanceFunction` | `DynamoDBReadPolicy` | Solo lectura sobre `sports-customers`                                |
+| Función | Política | Alcance |
+| :-- | :-- | :-- |
+| `RouterFunction` | `DynamoDBCrudPolicy` | Lectura y escritura sobre `sports-customers` y `sports-reservations` |
+| `CheckBalanceFunction` | `DynamoDBReadPolicy` | Solo lectura sobre `sports-customers` |
 
 **Permisos de conectividad (Resource-based Policies):**
 
@@ -81,21 +91,21 @@ Se configuran explícitamente permisos para que `connect.amazonaws.com` y `lexv2
 
 ### `sports-customers`
 
-| Atributo       | Tipo   | Rol           |
-| :------------- | :----- | :------------ |
+| Atributo | Tipo | Rol |
+| :-- | :-- | :-- |
 | `customer_dni` | String | Partition Key |
 
 ### `sports-reservations`
 
-| Atributo         | Tipo   | Rol           |
-| :--------------- | :----- | :------------ |
+| Atributo | Tipo | Rol |
+| :-- | :-- | :-- |
 | `reservation_id` | String | Partition Key |
 
 **GSI — `CustomerIndex`:**
 
-| Atributo               | Tipo   | Rol   |
-| :--------------------- | :----- | :---- |
-| `customer_dni`         | String | HASH  |
+| Atributo | Tipo | Rol |
+| :-- | :-- | :-- |
+| `customer_dni` | String | HASH |
 | `reservation_datetime` | String | RANGE |
 
 ## 6. API Reference (Payloads de integración)
@@ -136,29 +146,37 @@ Se configuran explícitamente permisos para que `connect.amazonaws.com` y `lexv2
 }
 ```
 
-## 7. Configuración de Amazon Lex V2 (`bot-reservas`)
+## 7. Configuración de los bots de Amazon Lex V2
 
-| Configuración        | Valor                                                      |
-| :------------------- | :--------------------------------------------------------- |
-| **Intención**        | `ReserveCourtIntent`                                       |
+### `bot-reservas` (ejecutor transaccional)
+
+Es el bot tradicional del proyecto: tiene intents y slots, y delega el fulfillment en Lambda.
+
+| Configuración | Valor |
+| :-- | :-- |
+| **Intención** | `ReserveCourtIntent` |
 | **Slots requeridos** | `sl_customer_dni`, `slt_court_types`, `sl_date`, `sl_time` |
-| **Fulfillment**      | Lambda `sports-credits-router`                             |
+| **Fulfillment** | Lambda `sports-credits-router` |
+
+### `bot-clasificador-q` (conector)
+
+Bot que Amazon Connect requiere para integrar Amazon Q in Connect. Solo existe el intent que se genera al activar la integración; no se construyó lógica de intents en este bot. Toda la interpretación del mensaje ocurre en Amazon Q in Connect.
 
 ## 8. Flujo de la conversación
 
 ```text
-Usuario → Amazon Connect → bot-clasificador-q (Amazon Q in Connect)
-                                    │
-                    ┌───────────────┼───────────────┐
-                    ▼               ▼               ▼
-              Respuesta RAG   bot-reservas      Handoff
-              (FAQ, precios)  (Lex V2)          (Agente humano)
-                                    │
-                              ┌─────┼─────┐
-                              ▼           ▼
-                        check-balance   router
-                        (Lambda)        (Lambda)
-                              │           │
-                              ▼           ▼
-                          DynamoDB    DynamoDB
+Usuario → Amazon Connect → bot-clasificador-q (conector) → Amazon Q in Connect (orquestador)
+                                                                   │
+                                   ┌───────────────────────────────┼───────────────────────┐
+                                   ▼                               ▼                       ▼
+                             Respuesta RAG                    bot-reservas              Handoff
+                             (FAQ, precios, S3)               (Lex V2, ejecutor)        (agente humano
+                                                                   │                     + text-parser)
+                                                             ┌─────┴─────┐
+                                                             ▼           ▼
+                                                       check-balance   router
+                                                         (Lambda)     (Lambda)
+                                                             │           │
+                                                             ▼           ▼
+                                                         DynamoDB    DynamoDB
 ```
