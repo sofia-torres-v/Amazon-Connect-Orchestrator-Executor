@@ -91,7 +91,7 @@ Este proyecto es un **prototipo**, no un sistema listo para producción.
 - Los bots de Amazon Lex V2 (`bot-reservas` y `bot-clasificador-q`).
 - El widget de chat de Connect y la interfaz web.
 
-El paso a paso está en [docs/TECHNICAL.md](docs/TECHNICAL.md).
+El paso a paso está en [Documentación Técnica Detallada](docs/TECHNICAL.md).
 
 ## Estructura del repositorio
 
